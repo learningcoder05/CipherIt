@@ -4,6 +4,7 @@ import os
 import argparse
 from cryptography.fernet import Fernet
 from tqdm import tqdm
+from datetime import datetime
 import time
 
 
@@ -12,6 +13,7 @@ parser.add_argument("-p","--path",required=True,help = "The path of files to be 
 parser.add_argument("-k","--key",required=True,type=str,help = "The path where you want the key to be stored")
 parser.add_argument("-e","--encrypt",action="store_true",help="Encrypt the files in the specified directory")
 parser.add_argument("-d","--decrypt",action="store_true",help="Decrypt the files in the specified directory")
+parser.add_argument("--key-name",type=str,default=None,help="Custom name for the generated key file (without .key extension)")
 args = parser.parse_args()
 if args.encrypt == args.decrypt:
     parser.error("Choose exactly one of --encrypt or --decrypt.")
@@ -52,20 +54,28 @@ def show_banner():
 
 def Encrypt():
     start_time = time.perf_counter()
-
     os.makedirs(args.key, exist_ok=True)
 
     key = Fernet.generate_key()
     cipher = Fernet(key)
 
-    with open(os.path.join(args.key, "thekey.key"), "wb") as thekey:
-        thekey.write(key)
+    # Generate key filename
+    if args.key_name:
+        key_filename = args.key_name
+        if not key_filename.endswith(".key"):
+            key_filename += ".key"
+    else:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        key_filename = f"cipherit_key_{timestamp}.key"
 
-    for file in tqdm(file_paths,
-                     desc="Encrypting",
-                     unit="file",
-                     colour="green"):
+    key_path = os.path.join(args.key, key_filename)
 
+    with open(key_path, "wb") as key_file:
+        key_file.write(key)
+
+    print(f"[+] Encryption key saved to: {key_path}")
+
+    for file in tqdm(file_paths, desc="Encrypting", unit="file", colour="green"):
         with open(file, "rb") as f:
             contents = f.read()
 
@@ -75,7 +85,6 @@ def Encrypt():
             f.write(encrypted)
 
     elapsed = time.perf_counter() - start_time
-
     print(f"\n[✓] Successfully encrypted {len(file_paths)} files in {elapsed:.2f} seconds.")
 
 def Decrypt():
