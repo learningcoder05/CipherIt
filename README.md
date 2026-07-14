@@ -45,7 +45,7 @@ CipherIt/
 Clone the repository:
 
 ```bash
-git clone https://github.com/<your-username>/CipherIt.git
+git clone https://github.com/learningcoder05/CipherIt.git
 cd CipherIt
 ```
 
