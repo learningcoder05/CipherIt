@@ -36,8 +36,6 @@ CipherIt/
 ├── ciphertool.py
 ├── requirements.txt
 ├── README.md
-├── LICENSE
-└── screenshots/
 ```
 
 ---
